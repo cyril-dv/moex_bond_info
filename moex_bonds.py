@@ -5,9 +5,22 @@ import requests
 from datetime import date, timedelta
 
 from pyxirr import xirr, DayCount
+from typing import Union, Optional
 
+def isin_secid(code: str, direction: Union[str, None] = "isin2secid") -> Optional[str]:
+    """
+    Looks up a security ID (SECID) or International Securities Identification Number (ISIN)
+    on the Moscow Exchange ISS data feed.
 
-def isin_secid(code, direction='isin2secid'):
+    Args:
+        code (str): The ISIN or SECID to look up.
+        direction (Union[str, None], optional): The conversion direction. Must be
+            either 'isin2secid' or 'secid2isin'. Defaults to "isin2secid".
+
+    Returns:
+        Optional[str]: The corresponding SECID or ISIN if found, otherwise None.
+    """
+
     if direction not in ['isin2secid', 'secid2isin']:
         raise Exception("Direction should be either 'isin2secid' or 'secid2isin'")
     code = str(code).upper()
@@ -35,9 +48,24 @@ def isin_secid(code, direction='isin2secid'):
             print(f'No match for SECID {code}')
 
 
-def moex_bond_info(ticker):
+def moex_bond_info(ticker: str) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """
+    Fetches bond information from the Moscow Exchange ISS data feed for the given ticker.
+
+    Args:
+        ticker (str): The ticker symbol (SECID) of the bond to retrieve information for.
+
+    Returns:
+        tuple[pd.DataFrame, pd.DataFrame]:
+            - A DataFrame containing general bond information (SECID, ISIN, name, etc.).
+            - A DataFrame containing cash flow information (coupons, amortizations, offers).
+    """
+
     try:
-        res_nfo = requests.get(f'https://iss.moex.com/iss/securities/{ticker}.json', timeout=5)
+        res_nfo = requests.get(
+            f'https://iss.moex.com/iss/securities/{ticker}.json', 
+            timeout=5
+        )
         res_nfo.raise_for_status()
         res_nfo = res_nfo.json()
     except requests.exceptions.RequestException as err:
@@ -60,7 +88,10 @@ def moex_bond_info(ticker):
     df_nfo.at['ISSUESIZE', 'value'] = f"{(float(df_nfo.at['ISSUESIZE', 'value']) * float(df_nfo.at['INITIALFACEVALUE', 'value']))/1e9:,.1f} млрд"
 
     try:
-        res_yld = requests.get(f'https://iss.moex.com/iss/engines/stock/markets/bonds/securities/{ticker}.json?iss.only=securities', timeout=5)
+        res_yld = requests.get(
+            f'https://iss.moex.com/iss/engines/stock/markets/bonds/securities/{ticker}.json?iss.only=securities', 
+            timeout=5
+        )
         res_yld.raise_for_status()
         res_yld = res_yld.json()
     except requests.exceptions.RequestException as err:
@@ -78,7 +109,10 @@ def moex_bond_info(ticker):
     tdy = date.today().strftime('%Y-%m-%d')
     wk_ago = (date.today() + timedelta(days=-14)).strftime('%Y-%m-%d')
     try:
-        res_vol = requests.get(f'https://iss.moex.com/iss/history/engines/stock/markets/bonds/securities/{ticker}.json?from={wk_ago}&till={tdy}&marketprice_board=1', timeout=5)
+        res_vol = requests.get(
+            f'https://iss.moex.com/iss/history/engines/stock/markets/bonds/securities/{ticker}.json?from={wk_ago}&till={tdy}&marketprice_board=1', 
+            timeout=5
+        )
         res_vol.raise_for_status()
         res_vol = res_vol.json()
     except requests.exceptions.RequestException as err:
@@ -103,7 +137,10 @@ def moex_bond_info(ticker):
     df_nfo = df_nfo.fillna('–')
 
     try:
-        res_cf = requests.get(f'https://iss.moex.com/iss/statistics/engines/stock/markets/bonds/bondization/{ticker}.json?limit=100', timeout=5)
+        res_cf = requests.get(
+            f'https://iss.moex.com/iss/statistics/engines/stock/markets/bonds/bondization/{ticker}.json?limit=100', 
+            timeout=5
+        )
         res_cf.raise_for_status()
         res_cf = res_cf.json()
     except requests.exceptions.RequestException as err:
@@ -137,7 +174,18 @@ def moex_bond_info(ticker):
     return df_nfo, df_cf
 
 
-def moex_bond_yield(df_nfo, df_cf, price):
+def moex_bond_yield(df_nfo: pd.DataFrame, df_cf: pd.DataFrame, price: float) -> float:
+    """
+    Calculates the Yield to Maturity (YTM) for a bond using the information in the provided DataFrames.
+
+    Args:
+        df_nfo (pd.DataFrame): DataFrame containing general bond information (SECID, ISIN, FACEVALUE, etc.).
+        df_cf (pd.DataFrame): DataFrame containing cash flow information (coupons, amortizations, offers).
+        price (float): The current market price of the bond.
+
+    Returns:
+        float: The calculated YTM as a percentage (rounded to two decimal places)
+    """
     df_cf = df_cf.replace({'–': None})
 
     if df_cf['coupon'].isna().any() or not df_cf[['offer', 'offer_type']].isna().all().all():
