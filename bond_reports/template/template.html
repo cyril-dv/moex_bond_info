@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" integrity="sha512-jnSuA4Ss2PkkikSOLtYs8BlYIeeIK1h99ty4YfvRPAlzr377vr3CXDb7sb7eEEBYjDtcYj+AjBH3FLv5uSJuXg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <title>{{ nfo.loc['NAME', 'value'] }}, {{ nfo.loc['ISIN', 'value'] }}</title>
+</head>
+<body>
+<div class="container-fluid mt-5">
+    <div class="row"><div class="col offset-1">
+        <h1 class="mb-0">{{ nfo.loc['NAME', 'value'] }}</h1>
+            <p><span>{{ nfo.loc['ISIN', 'value'] }}</span>{% if nfo.loc['ISIN', 'value'] != nfo.loc['SECID', 'value'] %}<span class="text-body-tertiary"> ({{ nfo.loc['SECID', 'value'] }})</span>{% endif %}</p>
+    </div></div>
+
+    <div class="row"><div class="col-auto offset-1 mb-3">
+        <table class="table table-striped table-bordered table-sm">
+            <thead>
+            <tr>
+                <th scope="col" style="width: 13rem;">Индекс</th>
+                <th scope="col" style="width: 19rem">Показатель</th>
+                <th scope="col" style="width: 15rem">Значение</th>
+            </tr>
+            </thead>
+            <tbody class="table-group-divider" style="border-top-color:#6C757D">
+            {% for idx, row in nfo.iterrows() %}
+            <tr>
+                <td class="text-body-secondary">{{ idx }}</td>
+                <td>{{ row['key'] }}</td>
+                <td>{{ row['value'] }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div></div>
+
+    <div class="row"><div class="col-auto offset-1 mb-3">
+        <table class="table table-striped table-bordered table-sm">
+            <thead>
+            <tr>
+                <th scope="col" class="text-center" style="width: 4rem;">#</th>
+                <th scope="col" style="width: 9rem;">Дата</th>
+                <th scope="col" style="width: 9rem;">Купон</th>
+                <th scope="col" style="width: 9rem;">Амортизация</th>
+                <th scope="col" style="width: 9rem;">Оферта</th>
+                <th scope="col" style="width: 9rem;">Тип оферты</th>
+            </tr>
+            </thead>
+            <tbody class="table-group-divider" style="border-top-color:#6C757D">
+            {% for idx, row in cf.iterrows() %}
+            <tr>
+                <td class="text-body-secondary text-center">{{ idx }}</td>
+                <td>{{ row['event_date'] }}</td>
+                <td>{{ row['coupon'] }}</td>
+                <td>{{ row['amt'] }}</td>
+                <td>{{ row['offer'] }}</td>
+                <td>{{ row['offer_type'] }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div></div>
+</div>
+</body>
+</html>
