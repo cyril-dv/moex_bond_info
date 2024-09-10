@@ -3,7 +3,7 @@
 
 Примеры использования функций представлены в ноутбуке *moex_bonds_tut* и включают в себя:
 1. Расчет доходности на текущую дату для простых облигаций;
-2. Генерацию [HTML отчета](https://html-preview.github.io/?url=https://github.com/cyril-dv/moex_bonds/blob/main/bond_reports/%D0%93%D0%B0%D0%B7%D0%BF%D1%80%D0%BE%D0%BC%D0%9AP8%2C%20RU000A105U00.html) для последующего использования в электронном или печатном виде.
+2. Генерацию [HTML отчета](https://html-preview.github.io/?url=https://github.com/cyril-dv/moex_bonds/blob/main/bond_reports/%D0%A0%D0%B5%D0%BD%D0%A1%D1%82%D1%801P1%2C%20RU000A100X69.html) для последующего использования в электронном или печатном виде.
 
 Зависимости:
 * requests
