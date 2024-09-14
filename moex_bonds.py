@@ -31,7 +31,8 @@ def isin_secid(code: str, direction: Union[str, None] = "isin2secid") -> Optiona
         data = data.json()
     except requests.exceptions.RequestException as err:
         print(f'{err.__class__.__name__}: {err}')
-    
+        raise
+
     df = pd.DataFrame(data['securities']['data'], columns=data['securities']['columns'])
 
     if direction == 'isin2secid':
@@ -70,7 +71,8 @@ def moex_bond_info(ticker: str) -> tuple[pd.DataFrame, pd.DataFrame]:
         res_nfo = res_nfo.json()
     except requests.exceptions.RequestException as err:
         print(f'{err.__class__.__name__}: {err}')
-    
+        raise
+
     df_nfo = pd.DataFrame(res_nfo['description']['data'], columns=res_nfo['description']['metadata'])
 
     if df_nfo.empty:
@@ -96,6 +98,7 @@ def moex_bond_info(ticker: str) -> tuple[pd.DataFrame, pd.DataFrame]:
         res_yld = res_yld.json()
     except requests.exceptions.RequestException as err:
         print(f'{err.__class__.__name__}: {err}')
+        raise
     df_yld = pd.DataFrame(res_yld['securities']['data'], columns=res_yld['securities']['columns'])
     df_yld = df_yld.loc[
             df_yld['BOARDID'].isin(['TQCB', 'TQOB']), 
@@ -117,6 +120,7 @@ def moex_bond_info(ticker: str) -> tuple[pd.DataFrame, pd.DataFrame]:
         res_vol = res_vol.json()
     except requests.exceptions.RequestException as err:
         print(f'{err.__class__.__name__}: {err}')
+        raise
     vol = pd.DataFrame(res_vol['history']['data'], columns=res_vol['history']['columns']).loc[:, 'VALUE'].mean()
     vol = 0 if np.isnan(vol) else vol
     df_vol = pd.DataFrame({'key': 'Среднедневной объем', 'value': f'{vol/1e6:,.1f} млн'}, index=['VOLUME'])
@@ -145,6 +149,7 @@ def moex_bond_info(ticker: str) -> tuple[pd.DataFrame, pd.DataFrame]:
         res_cf = res_cf.json()
     except requests.exceptions.RequestException as err:
         print(f'{err.__class__.__name__}: {err}')
+        raise
 
     df_coupons = (
         pd.DataFrame(res_cf['coupons']['data'], columns=res_cf['coupons']['columns'])
